@@ -3,7 +3,7 @@ Polylang Sync Some Fields
 
 Compatibility
 -------------
-Tested With WP 4.5.3, Polylang 1.9.3 - 1.9, ACF Free 4
+Tested With WP 4.8, Polylang 2.1, ACF Free 5
 
 Features:
 ---------
