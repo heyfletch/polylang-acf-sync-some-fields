@@ -1,6 +1,5 @@
 <?php
 
-
 if (!class_exists('PolylangSyncSomeFieldsWatch')) :
     class PolylangSyncSomeFieldsWatch
     {
@@ -32,8 +31,8 @@ if (!class_exists('PolylangSyncSomeFieldsWatch')) :
         private function __construct()
         {
             add_filter('pll_copy_post_metas', array(&$this, 'filter_keys'), 20, 3);
-            add_action('acf/create_field_options', array(&$this, 'action_acf_create_field_options'), 10, 1);
-            add_action('acf/create_field', array(&$this, 'action_acf_create_field'), 10, 1);
+            add_action('acf/render_field_settings', array(&$this, 'action_acf_create_field_options'), 10, 1);
+            add_action('acf/render_field', array(&$this, 'action_acf_create_field'), 10, 1);
             add_action('init', array(&$this, 'register_strings'));
         }
 
@@ -58,19 +57,18 @@ if (!class_exists('PolylangSyncSomeFieldsWatch')) :
             if (!PLL_ADMIN) {
                 return;
             }
-            $return = array();
-            $return = apply_filters('acf/get_field_groups', $return);
+            $return = acf_get_field_groups();
+
             foreach($return as $group) {
-                $lang = pll_get_post_language($group['id']);
+                /*$lang = pll_get_post_language($group['id']);
                 if ($lang != 'en') {
                     continue;
-                }
-                pll_register_string('group_' . $group['id'] . '_title', $group['title']);
+                }*/
+                pll_register_string('group_' . $group['ID'] . '_title', $group['title']);
 
-                $fields = array();
-                $fields = apply_filters('acf/field_group/get_fields', $fields, $group['id']);
-
+                $fields = acf_get_fields($group['ID']);
                 foreach($fields as $field) {
+
                     pll_register_string($field['key'] . '_label', $field['label']);
                     if (!isset($field['choices'])) {
                         continue;
@@ -89,11 +87,14 @@ if (!class_exists('PolylangSyncSomeFieldsWatch')) :
          */
         public function filter_keys($keys)
         {
+
             foreach($keys as $index=>$key) {
                 $field = get_field_object($key);
+                //var_dump($field);
                 if (!$field) { // no ACF field
                     continue;
                 }
+
                 // safeguard: on bulk editing, lang_sync is not set - so assume 0 to not mess up things
                 // see https://github.com/Mestrona/polylang-acf-sync-some-fields/issues/1
 	            $sync = isset($field['lang_sync']) ? $field['lang_sync'] : 0;
@@ -111,25 +112,21 @@ if (!class_exists('PolylangSyncSomeFieldsWatch')) :
          */
         public function action_acf_create_field_options($field)
         {
-            ?>
-            <tr class="foo" data-field_name="<?php echo $field['key']; ?>">
-                <td class="label"><label>Sync Field between Languages</label></td>
-                <td>
-                    <?php
-                    do_action('acf/create_field', array(
-                        'type' => 'radio',
-                        'name' => 'fields[' . $field['key'] . '][lang_sync]',
-                        'value' => isset($field['lang_sync']) ? $field['lang_sync'] : 1,
-                        'choices' => array(
-                            1 => __("Yes", 'acf'),
-                            0 => __("No", 'acf'),
-                        ),
-                        'layout' => 'horizontal',
-                    ));
-                    ?>
-                </td>
-            </tr>
-            <?php
+            //var_dump($field);
+            acf_render_field_setting( $field, array(
+                'label'         => __('Admin Only?'),
+                'instructions'  => '',
+                'type' => 'radio',
+                'name' => 'lang_sync',
+                'value' => isset($field['lang_sync']) ? $field['lang_sync'] : 0,
+                'choices' => array(
+                    1 => __("Yes", 'acf'),
+                    0 => __("No", 'acf'),
+                ),
+                'layout' => 'horizontal',
+                'required'          => 1,
+            ), true);
+        
         }
     }
 
