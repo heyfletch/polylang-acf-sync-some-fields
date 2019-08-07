@@ -39,7 +39,7 @@ if ( !class_exists('PolylangSyncSomeFieldsWatch') ) {
 
                 if ( isset($field['lang_sync']) ? $field['lang_sync'] : false ) {
 
-                     echo '<small style="color:MediumSeaGreen;">Synchronized</small>';
+                     echo '<small style="color:MediumSeaGreen;">Syncs Across Languages</small>';
 
                 }
 
